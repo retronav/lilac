@@ -31,7 +31,8 @@ func main() {
 		ctx.Set("persistence", persistence)
 	})
 
-	r.GET("/micropub", endpoints.HandleMicropubQuery)
+	micropubRouter := r.Group("/micropub")
+	micropubRouter.GET("", endpoints.HandleMicropubQuery)
 
 	http.ListenAndServe(":8080", r)
 }
