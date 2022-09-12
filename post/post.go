@@ -1,10 +1,10 @@
 package post
 
 import (
-	"reflect"
-
 	"github.com/fatih/structs"
+	"github.com/k3a/html2text"
 	"go.karawale.in/lilac/microformats"
+	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
@@ -29,25 +29,22 @@ type Post struct {
 
 func NormalizePostProperties(post microformats.Jf2) microformats.Jf2 {
 	for key, value := range post {
-		rValue := reflect.ValueOf(value)
 		switch key {
 		case "content":
-			switch rValue.Type().Kind() {
-			case reflect.String:
+			switch value := value.(type) {
+			case string:
 				post[key] = map[string]interface{}{
-					"html": rValue.String(),
-					"text": rValue.String(),
+					"html": value,
+					"text": value,
 				}
-			case reflect.Map:
-				valueKeys := rValue.MapKeys()
-				if slices.Contains(valueKeys, reflect.ValueOf("text")) &&
-					!slices.Contains(valueKeys, reflect.ValueOf("html")) {
-					post[key].(map[string]interface{})["html"] =
-						rValue.MapIndex(reflect.ValueOf("text"))
-				} else if slices.Contains(valueKeys, reflect.ValueOf("html")) &&
-					!slices.Contains(valueKeys, reflect.ValueOf("text")) {
-					post[key].(map[string]interface{})["text"] =
-						rValue.MapIndex(reflect.ValueOf("html"))
+			case map[string]interface{}:
+				valueKeys := maps.Keys(value)
+				if slices.Contains(valueKeys, "html") &&
+					!slices.Contains(valueKeys, "text") {
+					value["text"] = html2text.HTML2Text(value["html"].(string))
+				} else if slices.Contains(valueKeys, "text") &&
+					!slices.Contains(valueKeys, "html") {
+					value["html"] = value["text"]
 				}
 			}
 		}
