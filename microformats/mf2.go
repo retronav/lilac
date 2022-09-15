@@ -6,6 +6,10 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// Mf2 is a microformats2 entry.
+//
+// Nested properties in Jf2 should be loosely typed as map[string]interface{} or
+// []interface{} wherever applicable.
 type Mf2 struct {
 	Type       [1]string              `json:"type"`
 	Properties map[string]interface{} `json:"properties"`
@@ -25,6 +29,7 @@ var RESERVED_PROPERTIES_FOR_LILAC = []string{
 	"POST_TYPE",
 }
 
+// Jf2ToMf2 converts a jf2 representation of a entry back to microformats2.
 func Jf2ToMf2(jf2 Jf2) (Mf2, error) {
 	mf2 := Mf2{
 		Type:       [1]string{"h-" + jf2["type"].(string)},
@@ -65,12 +70,10 @@ func nestProperties(mf2 *Mf2, jf2 Jf2) error {
 				}
 				mf2.Properties[key] = valueMap
 			}
+		case reflect.Array, reflect.Slice:
+			mf2.Properties[key] = value
 		default:
-			if valueType.Kind() == reflect.Array || valueType.Kind() == reflect.Slice {
-				mf2.Properties[key] = value
-			} else {
-				mf2.Properties[key] = []interface{}{value}
-			}
+			mf2.Properties[key] = []interface{}{value}
 		}
 	}
 	return nil

@@ -10,6 +10,11 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// Jf2 is a jf2 representation of a microformats2 entry. See:
+// https://microformats.org/wiki/jf2
+//
+// Nested properties in Jf2 should be loosely typed as map[string]interface{} or
+// []interface{} wherever applicable.
 type Jf2 map[string]interface{}
 
 // JsonToJf2 converts JSON microformat entry to jf2.
@@ -107,6 +112,9 @@ func flattenProperties(jf2 Jf2, mf2 typed.Typed) (Jf2, error) {
 	return flattened, nil
 }
 
+// flattenValues flattens single-element arrays to the element itself.
+//
+// Example: `["foo"]` => `"foo"`
 func flattenValues(m map[string]interface{}) {
 	for key, value := range m {
 		if vSlice, ok := value.([]interface{}); ok {
