@@ -26,13 +26,9 @@ func main() {
 
 	r := gin.Default()
 	r.Use(middleware.BodyParser())
-	r.Use(func(ctx *gin.Context) {
-		ctx.Set("store", store)
-		ctx.Set("persistence", persistence)
-	})
 
 	micropubRouter := r.Group("/micropub")
-	micropubRouter.GET("", endpoints.HandleMicropubQuery)
+	micropubRouter.GET("", endpoints.HandleMicropubQuery(persistence))
 
 	http.ListenAndServe(":8080", r)
 }
