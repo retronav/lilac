@@ -7,12 +7,17 @@ import (
 	"github.com/go-test/deep"
 	"github.com/karlseguin/typed"
 	"github.com/matryer/is"
+	"golang.org/x/exp/maps"
 )
 
 type fixture[T any, U any] struct {
 	Name string
 	Raw  T
 	Want U
+
+	Add     Jf2
+	Replace Jf2
+	Delete  interface{}
 }
 
 func TestJsonToJf2(t *testing.T) {
@@ -140,6 +145,91 @@ func TestFormEncodedToJf2(t *testing.T) {
 		t.Logf("fixture: %s", f.Name)
 		got, err := FormEncodedToJf2(f.Raw)
 		is.NoErr(err)
+		if diff := deep.Equal(got, f.Want); diff != nil {
+			t.Error(diff)
+		} else {
+			t.Logf("success: %s", f.Name)
+		}
+	}
+}
+
+func TestAddInJf2(t *testing.T) {
+	post := Jf2{
+		"type":    "entry",
+		"content": "Hello World",
+	}
+
+	postAfterAddition := Jf2{
+		"type":     "entry",
+		"content":  "Hello World",
+		"category": []interface{}{"foo", "bar"},
+	}
+
+	post.Add(map[string]interface{}{
+		"category": []interface{}{"foo", "bar"},
+	})
+
+	if diff := deep.Equal(post, postAfterAddition); diff != nil {
+		t.Error(diff)
+	}
+}
+
+func TestReplaceInJf2(t *testing.T) {
+	post := Jf2{
+		"type":     "entry",
+		"content":  "Hello World",
+		"category": []interface{}{"1", "2", "3"},
+	}
+
+	postAfterAddition := Jf2{
+		"type":     "entry",
+		"content":  "Hello World",
+		"category": []interface{}{"foo", "bar"},
+	}
+
+	post.Replace(map[string]interface{}{
+		"category": []interface{}{"foo", "bar"},
+	})
+
+	if diff := deep.Equal(post, postAfterAddition); diff != nil {
+		t.Error(diff)
+	}
+}
+
+func TestDeleteInJf2(t *testing.T) {
+	fixtures := []fixture[Jf2, Jf2]{
+		{
+			Name: "Delete whole item",
+			Raw: Jf2{
+				"type":     "entry",
+				"content":  "Hello World",
+				"category": []interface{}{"foo", "bar"},
+			},
+			Want: Jf2{
+				"type":    "entry",
+				"content": "Hello World",
+			},
+			Delete: []string{"category"},
+		},
+		{
+			Name: "Delete specific element from array",
+			Raw: Jf2{
+				"type":     "entry",
+				"content":  "Hello World",
+				"category": []interface{}{"foo", "bar"},
+			},
+			Want: Jf2{
+				"type":     "entry",
+				"content":  "Hello World",
+				"category": []interface{}{"foo"},
+			},
+			Delete: map[string]interface{}{"category": []interface{}{"bar"}},
+		},
+	}
+	for _, f := range fixtures {
+		t.Logf("fixture: %s", f.Name)
+		got := maps.Clone(f.Raw)
+		got.Delete(f.Delete)
 		if diff := deep.Equal(got, f.Want); diff != nil {
 			t.Error(diff)
 		} else {

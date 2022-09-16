@@ -17,6 +17,72 @@ import (
 // []interface{} wherever applicable.
 type Jf2 map[string]interface{}
 
+// Add adds properties to an existing Jf2 object.
+// See: https://www.w3.org/TR/micropub/#h-add
+func (j Jf2) Add(spec map[string]interface{}) {
+	keys := maps.Keys(j)
+	for key, value := range spec {
+		if value, ok := value.([]interface{}); ok {
+			if slices.Contains(keys, key) {
+				j[key] = append(value, j[key])
+			} else {
+				if len(value) == 1 {
+					j[key] = value[0]
+				} else {
+					j[key] = value
+				}
+			}
+		}
+	}
+}
+
+// Replace replaces properties in an existing Jf2 object.
+// See: https://www.w3.org/TR/micropub/#h-replace
+func (j Jf2) Replace(spec map[string]interface{}) {
+	flatSpec := maps.Clone(spec)
+	flattenValues(flatSpec)
+	keys := maps.Keys(j)
+	for key, value := range flatSpec {
+		if slices.Contains(keys, key) {
+			j[key] = value
+		}
+	}
+}
+
+// Delete deletes properties from an existing Jf2 object.
+// See: https://www.w3.org/TR/micropub/#h-remove
+func (j Jf2) Delete(spec interface{}) {
+	switch spec := spec.(type) {
+	case []string:
+		maps.DeleteFunc(j, func(key string, value interface{}) bool {
+			return slices.Contains(spec, key)
+		})
+	case map[string]interface{}:
+		keys := maps.Keys(j)
+		for key, value := range spec {
+			if !slices.Contains(keys, key) {
+				continue
+			}
+			value, ok := value.([]interface{})
+			if !ok {
+				continue
+			}
+			jvalue, ok := j[key].([]interface{})
+			if !ok {
+				continue
+			}
+			for i, el := range jvalue {
+				for _, toDelete := range value {
+					if el == toDelete {
+						jvalue = slices.Delete(jvalue, i, i+1)
+					}
+				}
+			}
+			j[key] = jvalue
+		}
+	}
+}
+
 // JsonToJf2 converts JSON microformat entry to jf2.
 func JsonToJf2(typed typed.Typed) (Jf2, error) {
 	jf2 := Jf2{}
@@ -49,7 +115,7 @@ func FormEncodedToJf2(form map[string][]string) (Jf2, error) {
 			jf2[key] = value[0]
 		} else {
 			// Value is []string but is converted to []interface{} to align
-			// behaviour with JsonToJf2.
+			// behaviour with JsonToJf2.notes
 			sliceValue := make([]interface{}, 0)
 			for _, el := range value {
 				sliceValue = append(sliceValue, el)
