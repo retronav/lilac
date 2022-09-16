@@ -3,14 +3,11 @@ package post
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/fatih/structs"
 	"github.com/go-playground/validator/v10"
-	"github.com/k3a/html2text"
 	"github.com/mitchellh/mapstructure"
 	"go.karawale.in/lilac/microformats"
 	"golang.org/x/exp/maps"
@@ -64,83 +61,6 @@ type Post struct {
 	Slug       string        `json:"mp-slug,omitempty"`
 }
 
-// normalizeJf2Post prepares the jf2 form of a post to be converted to the
-// struct Post.
-func normalizeJf2Post(post microformats.Jf2) (microformats.Jf2, error) {
-	postKeys := maps.Keys(post)
-	for _, key := range postKeys {
-		value := post[key]
-		switch key {
-		case "content":
-			switch value := value.(type) {
-			case string:
-				post[key] = map[string]interface{}{
-					"html": value,
-					"text": value,
-				}
-			case map[string]interface{}:
-				valueKeys := maps.Keys(value)
-				if slices.Contains(valueKeys, "html") &&
-					!slices.Contains(valueKeys, "text") {
-					value["text"] = html2text.HTML2Text(value["html"].(string))
-				} else if slices.Contains(valueKeys, "text") &&
-					!slices.Contains(valueKeys, "html") {
-					value["html"] = value["text"]
-				}
-			default:
-				return nil, ErrorInvalidPost
-			}
-		case "location":
-			switch value := value.(type) {
-			case string:
-				if strings.HasPrefix(value, "geo:") && GeoUriRe.MatchString(value) {
-					// Location is a Geo URI
-					matches := GeoUriRe.FindStringSubmatch(value)
-					latitude := matches[GeoUriRe.SubexpIndex("lat")]
-					longitude := matches[GeoUriRe.SubexpIndex("lon")]
-					altitude := matches[GeoUriRe.SubexpIndex("alt")]
-					if latitude != "" && longitude != "" {
-						location := map[string]interface{}{
-							"latitude":  latitude,
-							"longitude": longitude,
-						}
-						if altitude != "" {
-							location["altitude"] = altitude
-						}
-						post[key] = location
-					}
-				} else {
-					// No idea what this is
-					return nil, fmt.Errorf("%w: invalid location string value", ErrorInvalidPost)
-				}
-			default:
-				return nil, ErrorInvalidPost
-			}
-		case "photo":
-			if value, ok := value.(string); ok {
-				post[key] = []map[string]string{
-					{"value": value, "alt": ""},
-				}
-			}
-			if value, ok := value.([]string); ok {
-				photos := []map[string]string{}
-				for _, photo := range value {
-					photos = append(photos, map[string]string{"value": photo, "alt": ""})
-				}
-				post[key] = photos
-			}
-		case "slug":
-			// slug is deprecated, move it to mp-slug
-			delete(post, "slug")
-			post["mp-slug"] = value.(string)
-		}
-	}
-	if !slices.Contains(postKeys, "published") {
-		post["published"] = time.Now()
-	}
-	return post, nil
-}
-
 func getPostType(post microformats.Jf2) PostType {
 	keys := maps.Keys(post)
 
@@ -168,16 +88,7 @@ func PostToJf2(post Post) microformats.Jf2 {
 
 	s := structs.New(post)
 	s.TagName = "json"
-
 	s.FillMap(jf2)
-
-	// de-reference any top level pointers
-	for key, value := range jf2 {
-		rvalue := reflect.ValueOf(value)
-		if rvalue.Kind() == reflect.Pointer && !rvalue.IsNil() {
-			jf2[key] = *value.(*interface{})
-		}
-	}
 
 	return jf2
 }
