@@ -4,6 +4,7 @@ branch = "main"
 
 [micropub]
 me = "https://karawale.in"
+token_endpoint = "https://tokens.indieauth.com/token"
 
 [micropub.media]
 dir = "public/media"

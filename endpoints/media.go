@@ -11,12 +11,27 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.karawale.in/lilac/middleware"
 	storepkg "go.karawale.in/lilac/store"
 	"gopkg.in/gographics/imagick.v2/imagick"
 )
 
 func HandleMediaUpload(store storepkg.GitStore) func(*gin.Context) {
 	return func(ctx *gin.Context) {
+		auth, exists := ctx.Get("auth")
+		if !exists {
+			logrus.Error("auth not present in context?")
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+		scope := auth.(middleware.IndieauthResponse).Scope
+
+		if !scope.Has("media") {
+			logrus.Error("insufficient scope for media upload")
+			ctx.Status(http.StatusForbidden)
+			return
+		}
+
 		media, err := ctx.FormFile("file")
 		if err != nil {
 			logrus.Error(err)

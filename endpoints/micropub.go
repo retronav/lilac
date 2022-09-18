@@ -29,7 +29,6 @@ var (
 
 func HandleMicropubQuery(persistence storepkg.Persistence) func(*gin.Context) {
 	return func(ctx *gin.Context) {
-
 		query := middleware.ArrayQueryParams(ctx.Request.URL.Query())
 		switch query.Get("q") {
 		case "source":
@@ -74,6 +73,14 @@ func HandleMicropubPOST(
 	store storepkg.GitStore,
 	persistence storepkg.Persistence) func(*gin.Context) {
 	return func(ctx *gin.Context) {
+		auth, exists := ctx.Get("auth")
+		if !exists {
+			logrus.Error("auth not present in context?")
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
+		scope := auth.(middleware.IndieauthResponse).Scope
+
 		body, exists := ctx.Get("body")
 		if !exists {
 			ctx.Status(http.StatusBadRequest)
@@ -85,6 +92,11 @@ func HandleMicropubPOST(
 		var err error // defined because := creates new variable in switch
 		switch {
 		case slices.Contains(mapKeys, "type") || slices.Contains(mapKeys, "h"):
+			if !scope.Has("create") {
+				logrus.Error("insufficient scope to create post")
+				ctx.Status(http.StatusForbidden)
+				return
+			}
 			var jf2 microformats.Jf2
 			switch ctx.ContentType() {
 			case gin.MIMEJSON:
@@ -117,6 +129,11 @@ func HandleMicropubPOST(
 
 			switch action {
 			case "update":
+				if !scope.Has("update") {
+					logrus.Error("insufficient scope to update post")
+					ctx.Status(http.StatusForbidden)
+					return
+				}
 				spec := map[string]map[string]interface{}{}
 				for _, specType := range []string{"add", "replace", "delete"} {
 					if slices.Contains(mapKeys, specType) {
@@ -130,6 +147,11 @@ func HandleMicropubPOST(
 					return
 				}
 			case "delete":
+				if !scope.Has("delete") {
+					logrus.Error("insufficient scope to delete post")
+					ctx.Status(http.StatusForbidden)
+					return
+				}
 				if err := deletePost(url, store, persistence); err != nil {
 					logrus.Error(err)
 					ctx.Status(http.StatusInternalServerError)
@@ -262,7 +284,10 @@ func deletePost(
 	if slices.Contains(mappingKeys, url) &&
 		slices.Contains(propertiesKeys, url) {
 		pathOnStore := persistence.PostMappings.Content[url]
-		if err := store.Fs.Rename(pathOnStore, pathOnStore+".deleted"); err != nil {
+		if err := store.Fs.Remove(pathOnStore); err != nil {
+			return err
+		}
+		if _, err := store.Fs.Create(pathOnStore + ".deleted"); err != nil {
 			return err
 		}
 
