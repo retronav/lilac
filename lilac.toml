@@ -1,0 +1,24 @@
+[store.git]
+path = "../testing"
+branch = "main"
+
+[micropub]
+me = "https://karawale.in"
+
+[micropub.media]
+dir = "public/media"
+
+[micropub.post]
+timezone = "Asia/Kolkata"
+
+[micropub.post.dir]
+note = "content/notes"
+article = "content/articles"
+checkin = "content/checkins"
+like = "content/likes"
+
+[micropub.post.url]
+note = "content/notes"
+article = "content/articles"
+checkin = "content/checkins"
+like = "content/likes"

@@ -65,7 +65,7 @@ import (
 
 func BodyParser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctHeader := ctx.GetHeader("content-type")
+		ctHeader := ctx.ContentType()
 		if ctHeader == "" {
 			return
 		}
@@ -87,13 +87,13 @@ func BodyParser() gin.HandlerFunc {
 			if err != nil {
 				ctx.Status(http.StatusBadRequest)
 			}
-			ctx.Set("body", ArrayQueryParams(ctx.Request.PostForm))
+			ctx.Set("body", toMapStringInterface(ArrayQueryParams(ctx.Request.PostForm)))
 		case gin.MIMEMultipartPOSTForm:
 			err = ctx.Request.ParseMultipartForm(10 * units.MB)
 			if err != nil {
 				ctx.Status(http.StatusBadRequest)
 			}
-			ctx.Set("body", ArrayQueryParams(ctx.Request.MultipartForm.Value))
+			ctx.Set("body", toMapStringInterface(ArrayQueryParams(ctx.Request.MultipartForm.Value)))
 		}
 	}
 }
@@ -107,4 +107,13 @@ func ArrayQueryParams(params url.Values) url.Values {
 		}
 	}
 	return params
+}
+
+func toMapStringInterface[K any](m map[string]K) map[string]interface{} {
+	to := make(map[string]interface{})
+
+	for key, value := range m {
+		to[key] = value
+	}
+	return to
 }
