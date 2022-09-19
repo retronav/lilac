@@ -45,6 +45,7 @@ func main() {
 	r.Use(middleware.BodyParser())
 	r.Use(func(ctx *gin.Context) {
 		ctx.Set("config", viper.GetViper())
+		ctx.Set("serverUrl", viper.GetString("server_url"))
 	})
 
 	micropubRouter := r.Group("/micropub")
