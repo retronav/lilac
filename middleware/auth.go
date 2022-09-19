@@ -31,7 +31,7 @@ func Indieauth(me string, tokenEndpoint string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		body, exists := ctx.Get("body")
 		if !exists {
-			log.Error("body is not parsed yet")
+			body = make(map[string]interface{})
 		}
 
 		tokenFromHeader, headerOk := getTokenFromHeader(ctx.Request.Header)
