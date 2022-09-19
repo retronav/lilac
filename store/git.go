@@ -84,10 +84,9 @@ func (g *GitStore) Init() error {
 	g.wt = wt
 	g.repo = repo
 
-	fmt.Println(absPath)
 	g.Fs = afero.NewBasePathFs(afero.NewOsFs(), absPath)
 
-	log.Info("git store initialized successfully")
+	log.Infof("git store initialized successfully at %s", absPath)
 	return nil
 }
 
@@ -95,7 +94,7 @@ func (g GitStore) Sync(message string) error {
 	if _, err := g.wt.Add("."); err != nil {
 		return err
 	}
-	if _, err := g.wt.Commit(message, &git.CommitOptions{}); err != nil {
+	if _, err := g.wt.Commit(message, &git.CommitOptions{All: true}); err != nil {
 		return err
 	}
 	// HACK: go-git does not seem to be running hooks, use the cli instead

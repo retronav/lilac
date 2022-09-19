@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-test/deep"
 	"github.com/matryer/is"
-	"go.karawale.in/lilac/microformats"
+	"karawale.in/go/lilac/microformats"
 )
 
 type fixture[T any, U any] struct {

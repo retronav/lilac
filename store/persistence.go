@@ -9,8 +9,8 @@ import (
 	"path"
 
 	log "github.com/sirupsen/logrus"
-	"go.karawale.in/lilac/kv"
-	"go.karawale.in/lilac/post"
+	"karawale.in/go/lilac/kv"
+	"karawale.in/go/lilac/post"
 )
 
 // Persistence is a umbrella store of multiple KeyValue stores storing various

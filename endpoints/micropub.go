@@ -14,13 +14,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
-	"go.karawale.in/lilac/microformats"
-	"go.karawale.in/lilac/middleware"
-	postpkg "go.karawale.in/lilac/post"
-	storepkg "go.karawale.in/lilac/store"
-	"go.karawale.in/lilac/template"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+	"karawale.in/go/lilac/microformats"
+	"karawale.in/go/lilac/middleware"
+	postpkg "karawale.in/go/lilac/post"
+	storepkg "karawale.in/go/lilac/store"
+	"karawale.in/go/lilac/template"
 )
 
 var (
@@ -97,6 +97,7 @@ func HandleMicropubPOST(
 				ctx.Status(http.StatusForbidden)
 				return
 			}
+			logrus.Info("request wants to create a post")
 			var jf2 microformats.Jf2
 			switch ctx.ContentType() {
 			case gin.MIMEJSON:
@@ -115,6 +116,7 @@ func HandleMicropubPOST(
 					return
 				}
 			}
+			logrus.Infof("parsed jf2: %+v", jf2)
 			postUrl, err := createPost(jf2, ctx, store, persistence)
 			if err != nil {
 				logrus.Error(err)
@@ -140,7 +142,8 @@ func HandleMicropubPOST(
 						spec[specType] = bodyMap[specType].(map[string]interface{})
 					}
 				}
-
+				logrus.Infof("request wants to update %s", url)
+				logrus.Infof("request update spec: %+v", spec)
 				if err := updatePost(url, spec, store, persistence); err != nil {
 					logrus.Error(err)
 					ctx.Status(http.StatusInternalServerError)
@@ -152,6 +155,7 @@ func HandleMicropubPOST(
 					ctx.Status(http.StatusForbidden)
 					return
 				}
+				logrus.Infof("request wants to delete %s", url)
 				if err := deletePost(url, store, persistence); err != nil {
 					logrus.Error(err)
 					ctx.Status(http.StatusInternalServerError)
@@ -159,7 +163,7 @@ func HandleMicropubPOST(
 				}
 			}
 		default:
-			ctx.Status(http.StatusBadRequest)
+			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 	}
@@ -212,7 +216,7 @@ func createPost(
 	fileBasename := fmt.Sprintf("%02d", fileBasenameInt+1)
 
 	filename := path.Join(postDir, postTimeDir, fileBasename+".md")
-	logrus.Info(filename)
+	logrus.Infof("post saved at: %s", filename)
 
 	relMe := viper.GetString("micropub.me")
 	postUrl, err = url.JoinPath(relMe, postUrlPrefix, postTimeDir, fileBasename)
@@ -231,7 +235,7 @@ func createPost(
 	if err = persistence.Dump(); err != nil {
 		return postUrl, err
 	}
-	if err = store.Sync(":ro1bot: Updates from Lilac"); err != nil {
+	if err = store.Sync(":robot: Updates from Lilac"); err != nil {
 		return postUrl, err
 	}
 
@@ -247,6 +251,7 @@ func updatePost(
 	if !exists {
 		return errorNotFound
 	}
+	postLocation := persistence.PostMappings.Content[url]
 	jf2 := postpkg.PostToJf2(post)
 
 	if add, exists := spec["add"]; exists {
@@ -261,6 +266,21 @@ func updatePost(
 
 	post, err := postpkg.Jf2ToPost(jf2)
 	if err != nil {
+		return err
+	}
+
+	updatedTime := time.Now()
+	post.Updated = &updatedTime
+
+	rendered := template.RenderMarkdown(post)
+	file, err := store.Fs.OpenFile(postLocation, os.O_RDWR, 0666)
+	if err != nil {
+		return err
+	}
+	if err = file.Truncate(0); err != nil {
+		return err
+	}
+	if _, err = file.WriteString(rendered); err != nil {
 		return err
 	}
 	persistence.PostProperties.Content[url] = post

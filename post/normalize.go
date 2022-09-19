@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/k3a/html2text"
-	"go.karawale.in/lilac/microformats"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+	"karawale.in/go/lilac/microformats"
 )
 
 // normalizeJf2Post prepares the jf2 form of a post to be converted to the

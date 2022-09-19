@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/goccy/go-yaml"
-	"go.karawale.in/lilac/post"
+	"karawale.in/go/lilac/post"
 )
 
 func RenderMarkdown(entry post.Post) string {

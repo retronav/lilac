@@ -1,4 +1,4 @@
-module go.karawale.in/lilac
+module karawale.in/go/lilac
 
 go 1.18
 

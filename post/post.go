@@ -9,9 +9,9 @@ import (
 	"github.com/fatih/structs"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"go.karawale.in/lilac/microformats"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
+	"karawale.in/go/lilac/microformats"
 )
 
 var (

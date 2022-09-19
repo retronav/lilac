@@ -11,9 +11,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"go.karawale.in/lilac/middleware"
-	storepkg "go.karawale.in/lilac/store"
 	"gopkg.in/gographics/imagick.v2/imagick"
+	"karawale.in/go/lilac/middleware"
+	storepkg "karawale.in/go/lilac/store"
 )
 
 func HandleMediaUpload(store storepkg.GitStore) func(*gin.Context) {

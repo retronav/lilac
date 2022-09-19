@@ -6,14 +6,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"go.karawale.in/lilac/endpoints"
-	"go.karawale.in/lilac/middleware"
-	storepkg "go.karawale.in/lilac/store"
+	"karawale.in/go/lilac/endpoints"
+	"karawale.in/go/lilac/middleware"
+	storepkg "karawale.in/go/lilac/store"
+	"karawale.in/go/lilac/version"
 )
 
 func main() {
-
+	logrus.Infof("Lilac version %s", version.Version)
+	if version.Version != "dev" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	viper.AddConfigPath(".")
 	viper.SetConfigName("lilac")
 	viper.SetConfigType("toml")

@@ -22,3 +22,6 @@ go.work
 
 # REST API playground
 test.http
+
+# Build directory
+build
