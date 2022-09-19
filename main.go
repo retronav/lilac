@@ -68,7 +68,7 @@ func main() {
 			logrus.Fatal(err)
 		}
 	case "unixsock":
-		listener, err := net.ListenUnix("unix", &net.UnixAddr{Name: viper.GetString("unix_socket")})
+		listener, err := net.Listen("unix", viper.GetString("unix_socket"))
 		if err != nil {
 			logrus.Fatal(err)
 		}
