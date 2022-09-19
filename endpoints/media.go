@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"path"
 	"time"
 
@@ -121,6 +122,11 @@ func HandleMediaUpload(store storepkg.GitStore) func(*gin.Context) {
 			return
 		}
 
+		mediaUrlDir := viper.GetString("micropub.media.url")
+		meUrl := viper.GetString("micropub.me")
+		mediaUrl, _ := url.JoinPath(meUrl, mediaUrlDir, filename)
+
+		ctx.Header("Location", mediaUrl)
 		ctx.Status(http.StatusCreated)
 	}
 }
