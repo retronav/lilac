@@ -1,0 +1,11 @@
+{{- $content := index .Post.content.html -}}
+{{- $_ := move .Post "published" "date" -}}
+{{- $_ := move .Post "type" "h" -}}
+{{- $_ := move .Post "mp-slug" "slug" -}}
+{{- $_ := move .Post "category" "tags" -}}
+{{- $_ := delete .Post "content" -}}
+---
+{{yaml .Post}}
+---
+
+{{$content}}

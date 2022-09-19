@@ -19,6 +19,7 @@ dir = "public/media"
 
 [micropub.post]
 timezone = "Asia/Kolkata"
+template = "./post.tmpl"
 
 [micropub.post.dir]
 note = "content/notes"

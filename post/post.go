@@ -42,12 +42,12 @@ var GeoUriRe = regexp.MustCompile(`geo:(?P<lat>[-?\d+.]*),(?P<lon>[-?\d+.]*)(,(?
 // Post is a structured format of a post which makes modifying/accessing
 // properties easier than the raw mf2/jf2 form.
 type Post struct {
-	POST_TYPE PostType `validate:"required" yaml:"POST_TYPE"`
+	POST_TYPE PostType `validate:"required"`
 
-	Type      string    `json:"type" validate:"required" yaml:"h"`
+	Type      string    `json:"type" validate:"required"`
 	Published time.Time `json:"published,omitempty" validate:"required"`
 
-	Content    *PostContent  `json:"content,omitempty" yaml:"-"`
+	Content    *PostContent  `json:"content,omitempty"`
 	Location   *PostLocation `json:"location,omitempty"`
 	Photo      *[]PostPhoto  `json:"photo,omitempty"`
 	Checkin    *Checkin      `json:"checkin,omitempty"`

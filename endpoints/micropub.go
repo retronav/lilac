@@ -96,7 +96,6 @@ func HandleMicropubPOST(
 		}
 		bodyMap := body.(map[string]interface{})
 		mapKeys := maps.Keys(bodyMap)
-
 		var err error // defined because := creates new variable in switch
 		switch {
 		case slices.Contains(mapKeys, "type") || slices.Contains(mapKeys, "h"):
@@ -171,6 +170,7 @@ func HandleMicropubPOST(
 				}
 			}
 		default:
+			logrus.Error("nothing to do")
 			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
@@ -224,7 +224,6 @@ func createPost(
 	fileBasename := fmt.Sprintf("%02d", fileBasenameInt+1)
 
 	filename := path.Join(postDir, postTimeDir, fileBasename+".md")
-	logrus.Infof("post saved at: %s", filename)
 
 	relMe := viper.GetString("micropub.me")
 	postUrl, err = url.JoinPath(relMe, postUrlPrefix, postTimeDir, fileBasename)
@@ -232,10 +231,15 @@ func createPost(
 		return postUrl, err
 	}
 
-	rendered := template.RenderMarkdown(post)
+	postTmpl := viper.GetString("micropub.post.template")
+	rendered, err := template.RenderTemplate(post, postTmpl)
+	if err != nil {
+		return postUrl, err
+	}
 	if err = os.WriteFile(path.Join(store.Path, filename), []byte(rendered), 0666); err != nil {
 		return postUrl, err
 	}
+	logrus.Infof("post saved at: %s", filename)
 
 	persistence.PostMappings.Content[postUrl] = filename
 	persistence.PostProperties.Content[postUrl] = post
@@ -280,7 +284,12 @@ func updatePost(
 	updatedTime := time.Now()
 	post.Updated = &updatedTime
 
-	rendered := template.RenderMarkdown(post)
+	postTmpl := viper.GetString("micropub.post.template")
+	rendered, err := template.RenderTemplate(post, postTmpl)
+	if err != nil {
+		return err
+	}
+
 	file, err := store.Fs.OpenFile(postLocation, os.O_RDWR, 0666)
 	if err != nil {
 		return err
