@@ -4,6 +4,8 @@
 serve_on = "unixsock"
 unix_socket = "./lilac.sock"
 
+server_url = "https://somewhere.test/path-if-behind-reverse-proxy"
+
 [store.git]
 path = "../testing"
 branch = "main"

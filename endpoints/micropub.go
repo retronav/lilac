@@ -31,6 +31,14 @@ func HandleMicropubQuery(persistence storepkg.Persistence) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		query := middleware.ArrayQueryParams(ctx.Request.URL.Query())
 		switch query.Get("q") {
+		case "config":
+			serverUrl := ctx.GetString("serverUrl")
+			mediaEndpoint, _ := url.JoinPath(serverUrl, "media")
+			ctx.JSON(http.StatusOK, gin.H{
+				"media-endpoint": mediaEndpoint,
+				"syndicate-to":   []string{},
+			})
+			return
 		case "source":
 			postUrl := ctx.Query("url")
 			if postUrl == "" {
