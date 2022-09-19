@@ -25,3 +25,5 @@ test.http
 
 # Build directory
 build
+
+lilac.toml

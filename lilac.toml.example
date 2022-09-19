@@ -1,3 +1,9 @@
+# serve_on = "port"
+# port = 8080
+
+serve_on = "unixsock"
+unix_socket = "./lilac.sock"
+
 [store.git]
 path = "../testing"
 branch = "main"

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -59,5 +60,20 @@ func main() {
 			viper.GetString("micropub.token_endpoint")))
 	mediaRouter.POST("", endpoints.HandleMediaUpload(store))
 
-	http.ListenAndServe(":8080", r)
+	serveOn := viper.GetString("serve_on")
+	switch serveOn {
+	case "port":
+		addr := fmt.Sprintf(":%d", viper.GetInt("port"))
+		if err = http.ListenAndServe(addr, r); err != nil {
+			logrus.Fatal(err)
+		}
+	case "unixsock":
+		listener, err := net.ListenUnix("unix", &net.UnixAddr{Name: viper.GetString("unix_socket")})
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		if err = http.Serve(listener, r); err != nil {
+			logrus.Fatal(err)
+		}
+	}
 }
