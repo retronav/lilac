@@ -121,6 +121,6 @@ func HandleMediaUpload(store storepkg.GitStore) func(*gin.Context) {
 			return
 		}
 
-		ctx.Status(http.StatusOK)
+		ctx.Status(http.StatusCreated)
 	}
 }

@@ -131,6 +131,7 @@ func HandleMicropubPOST(
 				return
 			}
 			ctx.Header("Location", postUrl)
+			ctx.Status(http.StatusCreated)
 		case slices.Contains(mapKeys, "action") &&
 			slices.Contains(mapKeys, "url"):
 			url := bodyMap["url"].(string)
