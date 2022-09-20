@@ -159,7 +159,7 @@ func flattenProperties(jf2 Jf2, mf2 typed.Typed) (Jf2, error) {
 				}
 				flattened[key] = flattenedValue
 			} else {
-				flatValueMap := make(Jf2)
+				flatValueMap := make(map[string]interface{})
 				for key, value := range valueMap {
 					flatValueMap[key] = value
 				}

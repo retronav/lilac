@@ -50,8 +50,11 @@ func main() {
 
 	micropubRouter := r.Group("/micropub")
 	micropubRouter.Use(
-		middleware.Indieauth(viper.GetString("micropub.me"),
-			viper.GetString("micropub.token_endpoint")))
+		middleware.Indieauth(
+			viper.GetString("micropub.me"),
+			viper.GetString("micropub.token_endpoint"),
+		),
+	)
 	micropubRouter.GET("", endpoints.HandleMicropubQuery(persistence))
 	micropubRouter.POST("", endpoints.HandleMicropubPOST(store, persistence))
 

@@ -89,7 +89,7 @@ func TestJsonToJf2(t *testing.T) {
       `,
 			Want: Jf2{
 				"name": "Test article",
-				"content": Jf2{
+				"content": map[string]interface{}{
 					"html": "<div>This is a <strong>test</strong> article fixture.</div>",
 				},
 				"category": []interface{}{"foo", "bar"},

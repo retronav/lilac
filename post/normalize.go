@@ -66,19 +66,21 @@ func normalizeJf2Post(post microformats.Jf2) (microformats.Jf2, error) {
 		case "photo":
 			switch value := value.(type) {
 			case string:
-				post[key] = []map[string]string{
+				post[key] = []map[string]interface{}{
 					{"value": value, "alt": ""},
 				}
 			case []string:
-				photos := []map[string]string{}
+				photos := []map[string]interface{}{}
 				for _, photo := range value {
-					photos = append(photos, map[string]string{"value": photo, "alt": ""})
+					photos = append(
+						photos,
+						map[string]interface{}{"value": photo, "alt": ""},
+					)
 				}
 				post[key] = photos
-			case map[string]string:
+			case map[string]interface{}:
 				// a single photo will be flattened; reverse it
-				post[key] = []map[string]string{value}
-
+				post[key] = []map[string]interface{}{value}
 			}
 		case "category":
 			switch value := value.(type) {
