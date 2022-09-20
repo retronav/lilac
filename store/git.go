@@ -91,10 +91,10 @@ func (g *GitStore) Init() error {
 }
 
 func (g GitStore) Sync(message string) error {
-	if _, err := g.wt.Add("."); err != nil {
+	if err := g.wt.AddWithOptions(&git.AddOptions{All: true}); err != nil {
 		return err
 	}
-	if _, err := g.wt.Commit(message, &git.CommitOptions{All: true}); err != nil {
+	if _, err := g.wt.Commit(message, &git.CommitOptions{}); err != nil {
 		return err
 	}
 	// HACK: go-git does not seem to be running hooks, use the cli instead
