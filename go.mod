@@ -9,7 +9,7 @@ require (
 
 require (
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
+	golang.org/x/net v0.0.0-20220919232410-f2f64ebce3c1 // indirect
 	golang.org/x/sys v0.0.0-20220915200043-7b5979e65e41 // indirect
 )
 
@@ -50,6 +50,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
+	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
@@ -58,8 +59,8 @@ require (
 )
 
 require (
+	github.com/davidbyttow/govips/v2 v2.11.0
 	github.com/gogs/git-module v1.7.0
 	github.com/matryer/is v1.4.0
 	golang.org/x/exp v0.0.0-20220907003533-145caa8ea1d0
-	gopkg.in/gographics/imagick.v2 v2.6.2
 )

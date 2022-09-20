@@ -9,10 +9,10 @@ import (
 	"path"
 	"time"
 
+	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"gopkg.in/gographics/imagick.v2/imagick"
 	"karawale.in/go/lilac/middleware"
 	storepkg "karawale.in/go/lilac/store"
 )
@@ -77,30 +77,25 @@ func HandleMediaUpload(store storepkg.GitStore) func(*gin.Context) {
 			return
 		}
 
-		imagick.Initialize()
-		defer imagick.Terminate()
+		vips.Startup(nil)
+		defer vips.Shutdown()
 
-		mw := imagick.NewMagickWand()
-		defer mw.Destroy()
-
-		if err = mw.ReadImageBlob(fileBlob); err != nil {
+		img, err := vips.LoadImageFromBuffer(fileBlob, vips.NewImportParams())
+		if err != nil {
 			logrus.Error(err)
 			ctx.Status(http.StatusInternalServerError)
 			return
 		}
 
-		if err = mw.SetImageFormat("webp"); err != nil {
-			logrus.Error(err)
-			ctx.Status(http.StatusInternalServerError)
-			return
-		}
-		if err = mw.SetImageCompressionQuality(80); err != nil {
-			logrus.Error(err)
-			ctx.Status(http.StatusInternalServerError)
-			return
-		}
+		exportParams := vips.NewWebpExportParams()
+		exportParams.StripMetadata = true
 
-		processedBlob := mw.GetImageBlob()
+		processedBlob, _, err := img.ExportWebp(exportParams)
+		if err != nil {
+			logrus.Error(err)
+			ctx.Status(http.StatusInternalServerError)
+			return
+		}
 
 		filename := time.Now().Format(timestampFormat) + ".webp"
 
