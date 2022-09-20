@@ -109,7 +109,7 @@ func TestJf2ToPost(t *testing.T) {
 					"latitude":  "00",
 					"longitude": "00",
 				},
-				"category": []interface{}{"foo", "bar"},
+				"category": "travel",
 			},
 			Want: Post{
 				POST_TYPE: PostCheckin,
@@ -124,7 +124,7 @@ func TestJf2ToPost(t *testing.T) {
 					Latitude:  "00",
 					Longitude: "00",
 				},
-				Category:  []string{"foo", "bar"},
+				Category:  []string{"travel"},
 				Published: publishedTime,
 			},
 		},

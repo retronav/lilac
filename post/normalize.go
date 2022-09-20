@@ -64,17 +64,27 @@ func normalizeJf2Post(post microformats.Jf2) (microformats.Jf2, error) {
 				return nil, ErrorInvalidPost
 			}
 		case "photo":
-			if value, ok := value.(string); ok {
+			switch value := value.(type) {
+			case string:
 				post[key] = []map[string]string{
 					{"value": value, "alt": ""},
 				}
-			}
-			if value, ok := value.([]string); ok {
+			case []string:
 				photos := []map[string]string{}
 				for _, photo := range value {
 					photos = append(photos, map[string]string{"value": photo, "alt": ""})
 				}
 				post[key] = photos
+			case map[string]string:
+				// a single photo will be flattened; reverse it
+				post[key] = []map[string]string{value}
+
+			}
+		case "category":
+			switch value := value.(type) {
+			// a single category will be flattened; reverse it
+			case string:
+				post[key] = []string{value}
 			}
 		case "slug":
 			// slug is deprecated, move it to mp-slug
