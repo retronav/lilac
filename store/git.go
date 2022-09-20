@@ -1,15 +1,11 @@
 package store
 
 import (
-	"bufio"
 	"fmt"
-	"io"
-	"os/exec"
 	"path/filepath"
+	"time"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/sirupsen/logrus"
+	git "github.com/gogs/git-module"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 )
@@ -27,9 +23,7 @@ type GitStore struct {
 	// initializing the store.
 	Branch string
 
-	// wt is the initialized worktree from Init.
-	wt *git.Worktree
-
+	// repo is the git repository.
 	repo *git.Repository
 
 	// Fs is the initialized filesystem.
@@ -44,46 +38,22 @@ func (g *GitStore) Init() error {
 		return err
 	}
 	g.Path = absPath
-
-	log.Debugf("initializing git store at %s", g.Path)
-	repo, err := git.PlainOpen(g.Path)
+	repo, err := git.Open(g.Path)
 	if err != nil {
-		return fmt.Errorf("repository error: %w", err)
+		return fmt.Errorf("error opening repository: %w", err)
 	}
-
-	wt, err := repo.Worktree()
-	if err != nil {
-		return fmt.Errorf("worktree error: %w", err)
+	if !repo.HasBranch(g.Branch) {
+		return fmt.Errorf("branch %s does not exist", g.Branch)
 	}
-
-	_, err = repo.Branch(g.Branch)
-	if err != nil {
-		return fmt.Errorf("branch error: %w", err)
+	if err = repo.Pull(git.PullOptions{
+		All:    false,
+		Remote: "origin",
+		Branch: g.Branch}); err != nil {
+		return err
 	}
 	log.Debugf("branch %s exists", g.Branch)
-
-	err = wt.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.NewBranchReferenceName(g.Branch),
-	})
-	if err != nil {
-		return fmt.Errorf("checkout error: %w", err)
-	}
-
-	status, err := wt.Status()
-	if err != nil {
-		return fmt.Errorf("cannot fetch repo status: %w", err)
-	}
-
-	if !status.IsClean() {
-		err = wt.Pull(&git.PullOptions{})
-		if err != nil {
-			return fmt.Errorf("git force pull error: %w", err)
-		}
-		log.Debug("pulled updates")
-	}
-	g.wt = wt
+	log.Debugf("initializing git store at %s", g.Path)
 	g.repo = repo
-
 	g.Fs = afero.NewBasePathFs(afero.NewOsFs(), absPath)
 
 	log.Infof("git store initialized successfully at %s", absPath)
@@ -91,34 +61,18 @@ func (g *GitStore) Init() error {
 }
 
 func (g GitStore) Sync(message string) error {
-	if err := g.wt.AddWithOptions(&git.AddOptions{All: true}); err != nil {
+	if err := g.repo.Add(git.AddOptions{All: true}); err != nil {
 		return err
 	}
-	if _, err := g.wt.Commit(message, &git.CommitOptions{}); err != nil {
+	committer := &git.Signature{
+		Name:  "Lilac",
+		Email: "lilac@localhost",
+		When:  time.Now().UTC(),
+	}
+	if err := g.repo.Commit(committer, message); err != nil {
 		return err
 	}
-	// HACK: go-git does not seem to be running hooks, use the cli instead
-	cmd := exec.Command("git", "push")
-	cmd.Dir = g.Path
-
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-	in := bufio.NewScanner(io.MultiReader(stdout, stderr))
-	logrus.Info("git push log:\n")
-	for in.Scan() {
-		logrus.Info(in.Text())
-	}
-	if err = cmd.Wait(); err != nil {
+	if err := g.repo.Push("origin", g.Branch); err != nil {
 		return err
 	}
 
