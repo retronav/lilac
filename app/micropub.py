@@ -12,8 +12,10 @@ import mimetypes
 import uuid
 from os import path
 import os
+import shutil
 import requests
 import dateutil.parser
+import glob
 
 # TODO: map errors to correct response codes and return error in JSON as given
 # in the spec.
@@ -77,22 +79,16 @@ def write_post_to_file(post: models.Post):
 
 
 def sync_posts_to_ssg(session: Session):
-    posts: List[models.Post] = session.query(models.Post).all()
-    deleted_posts: List[models.DeletedPost] = session.query(models.DeletedPost).all()
+    for entry in glob.glob(
+        "content/*/[!_index.md]*", root_dir=current_app.config.get("WEBSITE_DIR")
+    ):
+        entry = path.join(current_app.config.get("WEBSITE_DIR"), entry)
+        if path.isfile(entry):
+            os.remove(entry)
+        elif path.isdir(entry):
+            shutil.rmtree(entry)
 
-    for deleted_post in deleted_posts:
-        posts_dir = path.join(
-            current_app.config.get("WEBSITE_DIR"),
-            current_app.config.get("WEBSITE_POST_DIR"),
-            path.dirname(deleted_post.id),
-        )
-        try:
-            os.remove(path.join(posts_dir, path.basename(deleted_post.id) + ".md"))
-            if len(os.listdir(posts_dir)) == 0:
-                # Remove empty directories
-                os.removedirs(posts_dir)
-        except OSError:
-            ...
+    posts: List[models.Post] = session.query(models.Post).all()
 
     for post in posts:
         write_post_to_file(post)
