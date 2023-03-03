@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+sqlalchemy = "*"
+requests = "*"
+"ruamel.yaml" = "*"
+python-dateutil = "*"
+alembic = "*"
+
+[dev-packages]
+pyopenssl = "*"
+black = "*"
+
+[requires]
+python_version = "3.10"
