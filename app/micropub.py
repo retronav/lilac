@@ -208,7 +208,7 @@ def micropub_crud():
                 )
                 session.commit()
                 sync_posts_to_ssg(session)
-            return
+            return "", 200
 
         elif action == "delete":
             if "delete" not in g.token_scope:
@@ -228,12 +228,12 @@ def micropub_crud():
 
     post = models.Post()
     post.type = mf2["type"][0]
-    post.kind = models.PostKind.note
     post.data = {
         key: properties[key]
         for key in properties
         if key not in ["published", "updated"]
     }
+    post.kind = post.get_kind()
     post.published = (
         dateutil.parser.isoparse(properties["published"][0])
         if "published" in properties
