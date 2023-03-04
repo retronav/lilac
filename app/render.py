@@ -20,7 +20,7 @@ def render_post(post: models.Post):
         "h": post.type.removeprefix("h-"),
         "kind": post.kind.value,
         "published": post.published.replace(tzinfo=timezone.utc),
-        "updated": post.updated.replace(tzinfo=timezone.utc) if post.updated else None,
+        "lastmod": post.updated.replace(tzinfo=timezone.utc) if post.updated else None,
         "tags": post.data.get("category"),
         # Kind-specific properties
         "like-of": util.pluck_one(post.data.get("like-of")),
