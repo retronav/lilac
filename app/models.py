@@ -11,6 +11,7 @@ class PostKind(enum.Enum):
     like = "like"
     bookmark = "bookmark"
     repost = "repost"
+    photo = "photo"
 
 
 class Post(Base):
@@ -61,6 +62,8 @@ class Post(Base):
             return PostKind.bookmark
         elif "repost-of" in self.data:
             return PostKind.repost
+        elif "photo" in self.data:
+            return PostKind.photo
         else:
             return PostKind.note
 
