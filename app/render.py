@@ -28,7 +28,7 @@ def render_post(post: models.Post):
         "bookmark-of": util.pluck_one(post.data.get("bookmark-of")),
         "in-reply-to": util.pluck_one(post.data.get("in-reply-to")),
         "photo": post.data.get("photo"),
-        "title": util.pluck_one(post.data.get("name"))
+        "title": util.pluck_one(post.data.get("name")),
     }
 
     # Post processing
