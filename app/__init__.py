@@ -1,6 +1,6 @@
 import os
 from flask import Flask
-from app import micropub
+from app import micropub, errors
 from app.database import Session
 
 
@@ -36,6 +36,14 @@ def create_app(test_config=None):
     with app.app_context():
         with Session() as session:
             micropub.sync_posts_to_ssg(session)
+
+    # Register errors
+    with app.app_context():
+
+        @app.errorhandler(errors.BaseError)
+        def handle_error(error: errors.BaseError):
+            app.logger.info(f"the error: {error.code}")
+            return {"error": error.error, "message": error.message}, error.code
 
     app.register_blueprint(micropub.endpoint)
 

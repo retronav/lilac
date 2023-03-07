@@ -2,10 +2,10 @@ from datetime import datetime
 import posixpath
 from urllib.parse import urlparse, urljoin
 from flask import request, Blueprint, current_app, g
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 from sqlalchemy import update, delete
 from typing import Dict, List
-from app import models, util
+from app import models, util, errors
 from app.database import Session
 from app.render import render_post
 import mimetypes
@@ -26,7 +26,7 @@ endpoint = Blueprint("micropub", __name__)
 def validate(req: Dict):
     for p in ["type", "properties"]:
         if p not in req:
-            raise Exception(f"request does not have the property '{p}'")
+            raise errors.BadRequest(f"request does not have the property '{p}'")
 
 
 def form_req_to_mf2(flask_request_form) -> Dict:
@@ -51,7 +51,7 @@ def form_req_to_mf2(flask_request_form) -> Dict:
 def url_to_id(url: str) -> str:
     me_url = current_app.config.get("MICROPUB_ME")
     if url.startswith(me_url) == False:
-        raise Exception(f"URL not from {me_url}")
+        raise errors.BadRequest(f"URL not from {me_url}")
     post_id = url.removeprefix(me_url).strip("/")
     return post_id
 
@@ -60,8 +60,10 @@ def get_post(post_id: str) -> models.Post:
     with Session() as session:
         try:
             return session.query(models.Post).filter(models.Post.id == post_id).one()
+        except NoResultFound:
+            raise errors.NotFound(f"Post with id {post_id} does not exist")
         except SQLAlchemyError:
-            raise
+            raise errors.InternalServerError
 
 
 def write_post_to_file(post: models.Post):
@@ -98,9 +100,9 @@ def sync_posts_to_ssg(session: Session):
 def check_authorization():
     authorization = request.headers.get("Authorization")
     if not authorization:
-        raise Exception("No authorization header present")
+        raise errors.Unauthorized("No authorization header present")
     if not authorization.startswith("Bearer "):
-        raise Exception("Authorization header does not start with 'Bearer '")
+        raise errors.Unauthorized("Authorization header does not start with 'Bearer '")
     token = authorization.removeprefix("Bearer ")
 
     # Use this for testing without making calls to endpoint
@@ -120,7 +122,9 @@ def check_authorization():
         urlparse(resp["me"]).hostname
         != urlparse(current_app.config.get("MICROPUB_ME")).hostname
     ):
-        raise Exception("Token 'me' and 'me' set in configuration do not match")
+        raise errors.Unauthorized(
+            "Token 'me' and 'me' set in configuration do not match"
+        )
     g.token_scope = resp["scope"]
 
 
@@ -153,7 +157,7 @@ def micropub_query():
         else:
             return mf2
     else:
-        return "What?", 400
+        raise errors.BadRequest()
 
 
 @endpoint.post("/micropub")
@@ -168,14 +172,14 @@ def micropub_crud():
     if "action" in body and "url" in body:
         action = util.pluck_one(body["action"])
         if action not in ["update", "delete"]:
-            raise Exception("Unknown action")
+            raise errors.BadRequest("Unknown action")
         url = util.pluck_one(body["url"])
         post = get_post(url_to_id(url))
         new_data = dict(post.data)
 
         if action == "update":
             if "update" not in g.token_scope:
-                raise Exception("Scope 'update' not present in token")
+                raise errors.UnsufficientScope("Scope 'update' not present in token")
 
             add_spec: dict | None = body.get("add")
             replace_spec: dict | None = body.get("replace")
@@ -212,7 +216,7 @@ def micropub_crud():
 
         elif action == "delete":
             if "delete" not in g.token_scope:
-                raise Exception("Scope 'delete' not present in token")
+                raise errors.UnsufficientScope("Scope 'delete' not present in token")
 
             with Session() as session:
                 session.execute(delete(models.Post).where(models.Post.id == post.id))
@@ -221,7 +225,7 @@ def micropub_crud():
             return "", 200
 
     if "create" not in g.token_scope:
-        raise Exception("Scope 'create' not present in token")
+        raise errors.UnsufficientScope("Scope 'create' not present in token")
 
     mf2 = body if request.is_json else form_req_to_mf2(body)
     properties = mf2["properties"]
@@ -256,7 +260,7 @@ def micropub_crud():
 @endpoint.post("/micropub/media")
 def micropub_media():
     if "media" not in g.token_scope:
-        raise Exception("Scope 'media' not present in token")
+        raise errors.UnsufficientScope("Scope 'media' not present in token")
 
     file = request.files.get("file")
     if file:
@@ -290,4 +294,4 @@ def micropub_media():
             },
         )
     else:
-        return "", 400
+        raise errors.BadRequest()
