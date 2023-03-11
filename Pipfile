@@ -10,6 +10,7 @@ requests = "*"
 "ruamel.yaml" = "*"
 python-dateutil = "*"
 alembic = "*"
+pytest = "*"
 
 [dev-packages]
 pyopenssl = "*"

@@ -107,7 +107,7 @@ def check_authorization():
 
     # Use this for testing without making calls to endpoint
     if current_app.config.get("MICROPUB_ALLOW_ALL_TOKENS_UNSAFE"):
-        current_app.logger.warn(
+        current_app.logger.warning(
             "Micropub endpoint is accepting any token. DO NOT USE IN PRODUCTION."
         )
         g.token_scope = "create update delete media"
