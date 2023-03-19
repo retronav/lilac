@@ -4,9 +4,10 @@ from urllib.parse import urlparse, urljoin
 from flask import request, Blueprint, current_app, g
 from sqlalchemy.exc import SQLAlchemyError, NoResultFound
 from sqlalchemy import update, delete
+from sqlalchemy.orm import Session
 from typing import Dict, List
 from app import models, util, errors
-from app.database import Session
+from app.database import get_session
 from app.render import render_post
 import mimetypes
 import uuid
@@ -57,7 +58,7 @@ def url_to_id(url: str) -> str:
 
 
 def get_post(post_id: str) -> models.Post:
-    with Session() as session:
+    with get_session(current_app) as session:
         try:
             return session.query(models.Post).filter(models.Post.id == post_id).one()
         except NoResultFound:
@@ -204,7 +205,7 @@ def micropub_crud():
                             else:
                                 new_data[k] = new_value
             post.updated = datetime.utcnow()
-            with Session() as session:
+            with get_session(current_app) as session:
                 session.execute(
                     update(models.Post)
                     .where(models.Post.id == post.id)
@@ -218,7 +219,7 @@ def micropub_crud():
             if "delete" not in g.token_scope:
                 raise errors.UnsufficientScope("Scope 'delete' not present in token")
 
-            with Session() as session:
+            with get_session(current_app) as session:
                 session.execute(delete(models.Post).where(models.Post.id == post.id))
                 session.commit()
                 sync_posts_to_ssg(session)
@@ -243,7 +244,7 @@ def micropub_crud():
         if "published" in properties
         else datetime.utcnow()
     )
-    with Session() as session:
+    with get_session(current_app) as session:
         post.id = post.generate_id(session)
 
         session.add(post)

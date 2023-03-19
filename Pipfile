@@ -11,6 +11,8 @@ requests = "*"
 python-dateutil = "*"
 alembic = "*"
 pytest = "*"
+time-machine = "*"
+pytest-cov = "*"
 
 [dev-packages]
 pyopenssl = "*"

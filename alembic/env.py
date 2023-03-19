@@ -14,10 +14,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set database uri from flask config
-from data import config as flask_config
+# Set database uri from flask config if not exists
+if config.get_main_option("sqlalchemy.url") == "":
+    from data import config as flask_config
 
-config.set_section_option("alembic", "sqlalchemy.url", flask_config.DATABASE_URI)
+    config.set_main_option("sqlalchemy.url", flask_config.DATABASE_URI)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

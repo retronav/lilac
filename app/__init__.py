@@ -1,13 +1,13 @@
 import os
 from flask import Flask
 from app import micropub, errors
-from app.database import Session
+from app.database import get_session
 
 
-def create_app(test_config=None):
+def create_app(test_config=None, instance_path=os.path.join(os.getcwd(), "data")):
     app = Flask(
         __name__,
-        instance_path=os.path.join(os.getcwd(), "data"),
+        instance_path=instance_path,
         instance_relative_config=True,
     )
 
@@ -34,7 +34,7 @@ def create_app(test_config=None):
             raise Exception(f"Missing configuration property {property}")
 
     with app.app_context():
-        with Session() as session:
+        with get_session(app) as session:
             micropub.sync_posts_to_ssg(session)
 
     # Register errors

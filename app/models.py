@@ -2,7 +2,18 @@ import enum
 from app.database import Base
 from sqlalchemy import func, text, Column, Text, Enum, DateTime, JSON
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.sqlite import DATETIME
 from datetime import datetime
+
+# The default implementation of datetime for SQLite includes
+# microseconds which are overkill for our usecase, remove them from the
+# timestamp.
+datetime_sqlite_variant = DateTime().with_variant(
+    DATETIME(
+        storage_format="%(year)04d-%(month)02d-%(day)02d %(hour)02d:%(minute)02d:%(second)02d"
+    ),
+    "sqlite",
+)
 
 
 class PostKind(enum.Enum):
@@ -20,8 +31,15 @@ class Post(Base):
     id = Column(Text, primary_key=True)
     type = Column(Text, nullable=False)
     kind = Column(Enum(PostKind), nullable=False)
-    published = Column(DateTime, nullable=False, default=datetime.utcnow())
-    updated = Column(DateTime, server_default=text("NULL"))
+    published = Column(
+        datetime_sqlite_variant,
+        nullable=False,
+        default=datetime.utcnow(),
+    )
+    updated = Column(
+        datetime_sqlite_variant,
+        server_default=text("NULL"),
+    )
     data = Column(JSON, nullable=False)
 
     def generate_id(self, session: Session):
