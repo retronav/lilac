@@ -83,9 +83,17 @@ def write_post_to_file(post: models.Post):
 
 def sync_posts_to_ssg(session: Session):
     for entry in glob.glob(
-        "content/*/[!_index.md]*", root_dir=current_app.config.get("WEBSITE_DIR")
+        "./*[!_index.md]",
+        root_dir=path.join(
+            current_app.config.get("WEBSITE_DIR"),
+            current_app.config.get("WEBSITE_POST_DIR"),
+        ),
     ):
-        entry = path.join(current_app.config.get("WEBSITE_DIR"), entry)
+        entry = path.join(
+            current_app.config.get("WEBSITE_DIR"),
+            current_app.config.get("WEBSITE_POST_DIR"),
+            entry,
+        )
         if path.isfile(entry):
             os.remove(entry)
         elif path.isdir(entry):

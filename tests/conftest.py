@@ -20,11 +20,12 @@ class CustomClient(FlaskClient):
 @pytest.fixture()
 def app():
     website_dir = tempfile.TemporaryDirectory()
+    os.mkdir(os.path.join(website_dir.name, "content"))
     config = {
         "DATABASE_URI": f"sqlite:///{os.path.join(website_dir.name, 'posts.db')}",
         "WEBSITE_DIR": website_dir.name,
         "PREFERRED_URL_SCHEME": "https",
-        "WEBSITE_POST_DIR": ".",
+        "WEBSITE_POST_DIR": "content",
         "SERVER_NAME": "domain.tld",
         "MICROPUB_ME": "https://domain.tld",
         "MICROPUB_MEDIA_URL": "/uploads",
