@@ -1,11 +1,13 @@
+from pathlib import Path
+
 # URL for the database connection.
 DATABASE_URI = "sqlite:///data/posts.db"
 PREFERRED_URL_SCHEME = "https"
 
 # Directory where the website source is.
-WEBSITE_DIR = "../website"
+WEBSITE_DIR = Path("../website")
 # Content directory where the posts are rendered.
-WEBSITE_POST_DIR = "content"
+WEBSITE_POST_DIR = WEBSITE_DIR / "content"
 
 MICROPUB_ME = "https://domain.tld"
 # Directory where the uploaded media will be stored. Relative to WEBSITE_DIR.

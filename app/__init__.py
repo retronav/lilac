@@ -25,6 +25,7 @@ def create_app(test_config=None, instance_path=os.path.join(os.getcwd(), "data")
     required_properties = [
         "DATABASE_URI",
         "WEBSITE_DIR",
+        "WEBSITE_POST_DIR",
         "MICROPUB_ME",
         "MICROPUB_MEDIA_DIR",
         "MICROPUB_MEDIA_URL",

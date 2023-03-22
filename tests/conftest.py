@@ -6,6 +6,7 @@ from alembic.config import Config
 from alembic import command
 from flask.testing import FlaskClient
 from app import create_app
+from pathlib import Path
 
 published_ts = datetime.datetime(2023, 1, 29, 5, 30)
 updated_ts = datetime.datetime(2023, 1, 30, 16, 30)
@@ -23,13 +24,13 @@ def app():
     os.mkdir(os.path.join(website_dir.name, "content"))
     config = {
         "DATABASE_URI": f"sqlite:///{os.path.join(website_dir.name, 'posts.db')}",
-        "WEBSITE_DIR": website_dir.name,
+        "WEBSITE_DIR": Path(website_dir.name),
         "PREFERRED_URL_SCHEME": "https",
-        "WEBSITE_POST_DIR": "content",
+        "WEBSITE_POST_DIR": Path(website_dir.name) / "content",
         "SERVER_NAME": "domain.tld",
         "MICROPUB_ME": "https://domain.tld",
         "MICROPUB_MEDIA_URL": "/uploads",
-        "MICROPUB_MEDIA_DIR": ".",
+        "MICROPUB_MEDIA_DIR": Path(website_dir.name) / ".",
         "MICROPUB_ALLOW_ALL_TOKENS_UNSAFE": True,
         "TESTING": True,
     }

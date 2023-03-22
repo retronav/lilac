@@ -70,11 +70,7 @@ def get_post(post_id: str) -> models.Post:
 def write_post_to_file(post: models.Post):
     rendered_post = render_post(post)
 
-    posts_dir = path.join(
-        current_app.config.get("WEBSITE_DIR"),
-        current_app.config.get("WEBSITE_POST_DIR"),
-        path.dirname(post.id),
-    )
+    posts_dir = current_app.config.get("WEBSITE_POST_DIR") / path.dirname(post.id)
     os.makedirs(posts_dir, exist_ok=True)
 
     with open(path.join(posts_dir, path.basename(post.id) + ".md"), "w+") as f:
@@ -83,17 +79,9 @@ def write_post_to_file(post: models.Post):
 
 def sync_posts_to_ssg(session: Session):
     for entry in glob.glob(
-        "./*[!_index.md]",
-        root_dir=path.join(
-            current_app.config.get("WEBSITE_DIR"),
-            current_app.config.get("WEBSITE_POST_DIR"),
-        ),
+        "./*[!_index.md]", root_dir=current_app.config.get("WEBSITE_POST_DIR")
     ):
-        entry = path.join(
-            current_app.config.get("WEBSITE_DIR"),
-            current_app.config.get("WEBSITE_POST_DIR"),
-            entry,
-        )
+        entry = current_app.config.get("WEBSITE_POST_DIR") / entry
         if path.isfile(entry):
             os.remove(entry)
         elif path.isdir(entry):
@@ -274,20 +262,9 @@ def micropub_media():
     file = request.files.get("file")
     if file:
         filename = str(uuid.uuid4()) + mimetypes.guess_extension(file.mimetype)
-        media_dir = path.normpath(
-            path.join(
-                os.getcwd(),
-                current_app.config.get("WEBSITE_DIR"),
-                current_app.config.get("MICROPUB_MEDIA_DIR"),
-            )
-        )
+        media_dir = current_app.config.get("MICROPUB_MEDIA_DIR")
         os.makedirs(media_dir, exist_ok=True)
-        file.save(
-            path.join(
-                media_dir,
-                filename,
-            )
-        )
+        file.save(media_dir / filename)
 
         return (
             "",

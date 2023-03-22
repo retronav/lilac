@@ -32,7 +32,7 @@ class Fixture:
 
 
 def test_post_creation(client, app):
-    posts_dir = Path(app.config["WEBSITE_DIR"]) / app.config["WEBSITE_POST_DIR"]
+    posts_dir = app.config["WEBSITE_POST_DIR"]
     fixtures = [
         Fixture(
             {"type": ["h-entry"], "properties": {"content": ["Hello World!"]}},
@@ -172,7 +172,7 @@ def test_updating_post(client, app):
             "delete": ["category"],
         },
     ]
-    posts_dir = Path(app.config["WEBSITE_DIR"]) / app.config["WEBSITE_POST_DIR"]
+    posts_dir = app.config["WEBSITE_POST_DIR"]
 
     traveller.start()
     response = client.post("/micropub", json=original_post.post)
@@ -218,7 +218,7 @@ END;
 
 
 def test_deleting_post(client, app):
-    posts_dir = Path(app.config["WEBSITE_DIR"]) / app.config["WEBSITE_POST_DIR"]
+    posts_dir = app.config["WEBSITE_POST_DIR"]
     post = Fixture(
         {"type": ["h-entry"], "properties": {"content": ["Hello World!"]}},
         {
