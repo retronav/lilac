@@ -1,6 +1,8 @@
 import os
+
 from flask import Flask
-from app import micropub, errors
+
+from app import errors, micropub
 from app.database import get_session
 
 

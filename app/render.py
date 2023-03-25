@@ -1,9 +1,10 @@
-from io import StringIO
 from datetime import datetime, timezone
+from io import StringIO
+
 from flask import current_app
 from ruamel.yaml import YAML
-from app import models
-from app import util
+
+from app import models, util
 
 yaml = YAML()
 

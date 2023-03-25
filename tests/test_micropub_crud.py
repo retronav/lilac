@@ -1,10 +1,11 @@
+from io import TextIOWrapper
+
 import time_machine
 from ruamel.yaml import YAML
-from pathlib import Path
-from tests.conftest import published_ts, updated_ts
-from io import TextIOWrapper
-from app.database import get_session
 from sqlalchemy import text
+
+from app.database import get_session
+from tests.conftest import published_ts, updated_ts
 
 traveller = time_machine.travel(published_ts)
 yaml = YAML()

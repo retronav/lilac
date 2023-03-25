@@ -1,4 +1,5 @@
 import time_machine
+
 from tests.conftest import published_ts
 
 traveller = time_machine.travel(published_ts)

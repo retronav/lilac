@@ -1,9 +1,11 @@
 import enum
-from app.database import Base
-from sqlalchemy import func, text, Column, Text, Enum, DateTime, JSON
-from sqlalchemy.orm import Session
-from sqlalchemy.dialects.sqlite import DATETIME
 from datetime import datetime
+
+from sqlalchemy import JSON, Column, DateTime, Enum, Text, func, text
+from sqlalchemy.dialects.sqlite import DATETIME
+from sqlalchemy.orm import Session
+
+from app.database import Base
 
 # The default implementation of datetime for SQLite includes
 # microseconds which are overkill for our usecase, remove them from the

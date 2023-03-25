@@ -1,12 +1,14 @@
-import pytest
+import datetime
 import os
 import tempfile
-import datetime
-from alembic.config import Config
-from alembic import command
-from flask.testing import FlaskClient
-from app import create_app
 from pathlib import Path
+
+import pytest
+from flask.testing import FlaskClient
+
+from alembic import command
+from alembic.config import Config
+from app import create_app
 
 published_ts = datetime.datetime(2023, 1, 29, 5, 30)
 updated_ts = datetime.datetime(2023, 1, 30, 16, 30)
