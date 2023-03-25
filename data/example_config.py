@@ -11,7 +11,7 @@ WEBSITE_POST_DIR = WEBSITE_DIR / "content"
 
 MICROPUB_ME = "https://domain.tld"
 # Directory where the uploaded media will be stored. Relative to WEBSITE_DIR.
-MICROPUB_MEDIA_DIR = "assets/media"
+MICROPUB_MEDIA_DIR = WEBSITE_DIR / "assets" / "media"
 # Publicly accessible URL directory for the uploaded media. Here it will become:
 # https://domain.tld/media/<filename>.
 MICROPUB_MEDIA_URL = "/media"
