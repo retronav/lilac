@@ -29,7 +29,7 @@ A content management system based on technologies described by the
 6. Run the server.
    ```shell
    # This will run on port 5000, adjust to needs.
-   waitress-serve --port 5000 call "app:create_app"
+   waitress-serve --port 5000 --call "app:create_app"
    ```
    You can then connect Lilac to your domain using a reverse proxy server.
 
