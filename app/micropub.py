@@ -117,6 +117,8 @@ def check_authorization():
         token_endpoint,
         headers={"authorization": f"Bearer {token}", "accept": "application/json"},
     ).json()
+    if resp.get("error"):
+        raise errors.Unauthorized("Token was not authorized")
     if (
         urlparse(resp["me"]).hostname
         != urlparse(current_app.config.get("MICROPUB_ME")).hostname
