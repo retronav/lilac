@@ -1,4 +1,3 @@
-import glob
 import mimetypes
 import os
 import posixpath
@@ -6,6 +5,7 @@ import shutil
 import uuid
 from datetime import datetime
 from os import path
+from pathlib import Path
 from typing import Dict, List
 from urllib.parse import urljoin, urlparse
 
@@ -80,14 +80,16 @@ def write_post_to_file(post: models.Post):
 
 
 def sync_posts_to_ssg(session: Session):
-    for entry in glob.glob(
-        "./*[!.md]", root_dir=current_app.config.get("WEBSITE_POST_DIR")
-    ):
-        entry = current_app.config.get("WEBSITE_POST_DIR") / entry
-        if path.isfile(entry):
-            os.remove(entry)
-        elif path.isdir(entry):
-            shutil.rmtree(entry)
+    website_post_dir = current_app.config.get("WEBSITE_POST_DIR")
+
+    for root, dirs, files in os.walk(website_post_dir):
+        if Path(root) == website_post_dir:
+            continue
+        files = filter(lambda f: f == "_index.md", files)
+        for d in dirs:
+            shutil.rmtree(website_post_dir / root / d)
+        for f in files:
+            os.remove(website_post_dir / root / f)
 
     posts: List[models.Post] = session.query(models.Post).all()
 
