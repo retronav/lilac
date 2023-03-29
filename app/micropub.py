@@ -81,7 +81,7 @@ def write_post_to_file(post: models.Post):
 
 def sync_posts_to_ssg(session: Session):
     for entry in glob.glob(
-        "./*[!_index.md]", root_dir=current_app.config.get("WEBSITE_POST_DIR")
+        "./*[!.md]", root_dir=current_app.config.get("WEBSITE_POST_DIR")
     ):
         entry = current_app.config.get("WEBSITE_POST_DIR") / entry
         if path.isfile(entry):
