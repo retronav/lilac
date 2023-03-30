@@ -23,6 +23,7 @@ def render_post(post: models.Post):
         "published": post.published.replace(tzinfo=timezone.utc),
         "lastmod": post.updated.replace(tzinfo=timezone.utc) if post.updated else None,
         "tags": post.data.get("category"),
+        "summary": util.pluck_one(post.data.get("summary")),
         # Kind-specific properties
         "like-of": util.pluck_one(post.data.get("like-of")),
         "repost-of": util.pluck_one(post.data.get("repost-of")),
