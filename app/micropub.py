@@ -87,9 +87,9 @@ def sync_posts_to_ssg(session: Session):
             continue
         files = filter(lambda f: f == "_index.md", files)
         for d in dirs:
-            shutil.rmtree(website_post_dir / root / d)
+            shutil.rmtree(Path(root) / d)
         for f in files:
-            os.remove(website_post_dir / root / f)
+            os.remove(Path(root) / f)
 
     posts: List[models.Post] = session.query(models.Post).all()
 
