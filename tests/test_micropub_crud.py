@@ -40,7 +40,7 @@ def test_post_creation(client, app):
             {
                 "h": "entry",
                 "kind": "note",
-                "published": published_ts,
+                "date": published_ts,
             },
         ),
         Fixture(
@@ -51,7 +51,7 @@ def test_post_creation(client, app):
             {
                 "h": "entry",
                 "kind": "like",
-                "published": published_ts,
+                "date": published_ts,
                 "like-of": "https://some-cool.website",
             },
         ),
@@ -66,7 +66,7 @@ def test_post_creation(client, app):
             {
                 "h": "entry",
                 "kind": "photo",
-                "published": published_ts,
+                "date": published_ts,
                 "photo": [{"value": "https://nice.photo/1", "alt": ""}],
             },
         ),
@@ -83,7 +83,7 @@ def test_post_creation(client, app):
             {
                 "h": "entry",
                 "kind": "article",
-                "published": published_ts,
+                "date": published_ts,
                 "title": "Example article",
             },
         ),
@@ -108,7 +108,7 @@ def test_updating_post(client, app):
         {
             "h": "entry",
             "kind": "note",
-            "published": published_ts,
+            "date": published_ts,
         },
     )
 
@@ -124,8 +124,8 @@ def test_updating_post(client, app):
             {
                 "h": "entry",
                 "kind": "note",
-                "published": published_ts,
-                "lastmod": updated_ts,
+                "date": published_ts,
+                "updated": updated_ts,
                 "tags": ["foo", "bar"],
             },
         ),
@@ -140,8 +140,8 @@ def test_updating_post(client, app):
             {
                 "h": "entry",
                 "kind": "note",
-                "published": published_ts,
-                "lastmod": updated_ts,
+                "date": published_ts,
+                "updated": updated_ts,
                 "tags": ["foo"],
             },
         ),
@@ -155,8 +155,8 @@ def test_updating_post(client, app):
             {
                 "h": "entry",
                 "kind": "note",
-                "published": published_ts,
-                "lastmod": updated_ts,
+                "date": published_ts,
+                "updated": updated_ts,
             },
         ),
     ]
@@ -225,7 +225,7 @@ def test_deleting_post(client, app):
         {
             "h": "entry",
             "kind": "note",
-            "published": published_ts,
+            "date": published_ts,
         },
     )
     traveller.start()

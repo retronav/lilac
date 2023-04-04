@@ -17,11 +17,12 @@ yaml.representer.add_representer(datetime, represent_datetime)
 
 
 def render_post(post: models.Post):
+    # Change these according to your SSG's requirements.
     metadata = {
         "h": post.type.removeprefix("h-"),
         "kind": post.kind.value,
-        "published": post.published.replace(tzinfo=timezone.utc),
-        "lastmod": post.updated.replace(tzinfo=timezone.utc) if post.updated else None,
+        "date": post.published.replace(tzinfo=timezone.utc),
+        "updated": post.updated.replace(tzinfo=timezone.utc) if post.updated else None,
         "tags": post.data.get("category"),
         "summary": util.pluck_one(post.data.get("summary")),
         # Kind-specific properties
@@ -53,4 +54,4 @@ def render_post(post: models.Post):
     if type(content) == dict:
         content = content.get("html", content.get("value", ""))
 
-    return f"---\n{metadata_yaml.getvalue()}---\n{content}"
+    return f"---\n{metadata_yaml.getvalue()}---\n{content or ''}"
