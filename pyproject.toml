@@ -1,2 +1,31 @@
 [tool.black]
 line-length = 88
+
+[tool.poetry]
+name = "lilac"
+version = "0.1.0"
+description = "A content management system using Indieweb technologies."
+authors = ["Pranav Karawale"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+alembic = "^1"
+coverage = {version = "^7", extras = ["toml"]}
+flask = "^2"
+jinja2 = "^3"
+pytest = "^7"
+python-dateutil = "^2"
+requests = "^2"
+ruamel-yaml = "^0.17"
+sqlalchemy = "^2"
+time-machine = "^2"
+pydantic = "^2"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+waitress = "^2.1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
