@@ -5,6 +5,7 @@ from flask import current_app
 from ruamel.yaml import YAML
 
 from app import models, util
+from app.validators import PostProperties
 
 yaml = YAML()
 
@@ -35,8 +36,8 @@ def render_post(post: models.Post):
     }
 
     # Post processing
-    if metadata.get("photo"):
-        photos = metadata.get("photo")
+    photos = metadata.get("photo")
+    if photos:
         for n in range(len(photos)):
             photo = photos[n]
             if type(photo) == str:
@@ -45,10 +46,9 @@ def render_post(post: models.Post):
                 if "value" not in photo or "alt" not in photo:
                     raise Exception(f"{photo} is an invalid representation of a photo")
 
-    metadata = {k: v for k, v in metadata.items() if v != None}
-
+    metadata = PostProperties(**{k: v for k, v in metadata.items() if v != None})
     metadata_yaml = StringIO()
-    yaml.dump(metadata, metadata_yaml)
+    yaml.dump(metadata.model_dump(by_alias=True), metadata_yaml)
 
     content = util.pluck_one(post.data.get("content"))
     if type(content) == dict:

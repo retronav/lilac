@@ -20,7 +20,7 @@ requests = "^2"
 ruamel-yaml = "^0.17"
 sqlalchemy = "^2"
 time-machine = "^2"
-pydantic = "^2"
+pydantic = "^2.0.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
